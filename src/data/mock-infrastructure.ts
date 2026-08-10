@@ -1,0 +1,110 @@
+import { CloudNode, CloudEdge } from "@/types/infrastructure";
+
+// Symulowana infrastruktura: Load Balancer -> 2x Compute -> Database + Cache
+// To reprezentuje typowy, realistyczny wzorzec architektury 3-warstwowej
+export const mockNodes: CloudNode[] = [
+  {
+    id: "lb-1",
+    label: "Load Balancer",
+    type: "load-balancer",
+    status: "healthy",
+    provider: "aws",
+    region: "eu-central-1",
+    description: "Application Load Balancer rozdzielający ruch HTTP/HTTPS",
+    metrics: {
+      cpuUsage: 12,
+      memoryUsage: 20,
+      costPerHour: 0.025,
+      requestsPerSecond: 842,
+      latencyMs: 4,
+    },
+  },
+  {
+    id: "compute-1",
+    label: "App Server 01",
+    type: "compute",
+    status: "healthy",
+    provider: "aws",
+    region: "eu-central-1",
+    description: "Instancja EC2 t3.medium obsługująca warstwę aplikacji",
+    metrics: {
+      cpuUsage: 45,
+      memoryUsage: 62,
+      costPerHour: 0.0416,
+      requestsPerSecond: 420,
+      latencyMs: 18,
+    },
+  },
+  {
+    id: "compute-2",
+    label: "App Server 02",
+    type: "compute",
+    status: "warning",
+    provider: "aws",
+    region: "eu-central-1",
+    description: "Instancja EC2 t3.medium - podwyższone zużycie CPU",
+    metrics: {
+      cpuUsage: 84,
+      memoryUsage: 71,
+      costPerHour: 0.0416,
+      requestsPerSecond: 422,
+      latencyMs: 35,
+    },
+  },
+  {
+    id: "cache-1",
+    label: "Redis Cache",
+    type: "cache",
+    status: "healthy",
+    provider: "aws",
+    region: "eu-central-1",
+    description: "ElastiCache Redis - warstwa cache sesji i zapytań",
+    metrics: {
+      cpuUsage: 8,
+      memoryUsage: 34,
+      costPerHour: 0.017,
+      requestsPerSecond: 1204,
+      latencyMs: 1,
+    },
+  },
+  {
+    id: "db-1",
+    label: "PostgreSQL Primary",
+    type: "database",
+    status: "critical",
+    provider: "aws",
+    region: "eu-central-1",
+    description: "RDS PostgreSQL - wykryto zbliżanie się do limitu połączeń",
+    metrics: {
+      cpuUsage: 91,
+      memoryUsage: 88,
+      costPerHour: 0.126,
+      requestsPerSecond: 210,
+      latencyMs: 42,
+    },
+  },
+  {
+    id: "storage-1",
+    label: "S3 Object Storage",
+    type: "storage",
+    status: "healthy",
+    provider: "aws",
+    region: "eu-central-1",
+    description: "Bucket S3 do przechowywania plików statycznych i backupów",
+    metrics: {
+      cpuUsage: 0,
+      memoryUsage: 0,
+      costPerHour: 0.008,
+    },
+  },
+];
+
+export const mockEdges: CloudEdge[] = [
+  { id: "e-lb-c1", source: "lb-1", target: "compute-1", animated: true },
+  { id: "e-lb-c2", source: "lb-1", target: "compute-2", animated: true },
+  { id: "e-c1-cache", source: "compute-1", target: "cache-1", animated: true },
+  { id: "e-c2-cache", source: "compute-2", target: "cache-1", animated: true },
+  { id: "e-c1-db", source: "compute-1", target: "db-1", animated: true },
+  { id: "e-c2-db", source: "compute-2", target: "db-1", animated: true },
+  { id: "e-c1-storage", source: "compute-1", target: "storage-1", animated: false },
+];
