@@ -1,4 +1,5 @@
 import { InfrastructureGraph } from "@/components/topology/infrastructure-graph";
+import { SREAgentPanel } from "@/components/ai-agent/sre-agent-panel";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       </header>
 
       <InfrastructureGraph />
+      <SREAgentPanel />
     </main>
   );
 }

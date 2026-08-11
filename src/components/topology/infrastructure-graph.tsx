@@ -20,9 +20,9 @@ import { CloudNode } from "@/types/infrastructure";
 import { NodeDetailsPanel } from "./node-details-panel";
 
 // Rejestrujemy nasz custom komponent pod nazwą "cloudNode"
-const nodeTypes: NodeTypes = {
+const nodeTypes: NodeTypes = Object.freeze({
   cloudNode: CloudNodeCard,
-};
+});
 
 // Ustawia ręcznie pozycje węzłów w siatce (w realnym projekcie
 // można to policzyć automatycznie algorytmem "dagre", ale na start
