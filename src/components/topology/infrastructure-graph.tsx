@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -19,14 +19,10 @@ import { mockNodes, mockEdges } from "@/data/mock-infrastructure";
 import { CloudNode } from "@/types/infrastructure";
 import { NodeDetailsPanel } from "./node-details-panel";
 
-// Rejestrujemy nasz custom komponent pod nazwą "cloudNode"
 const nodeTypes: NodeTypes = Object.freeze({
   cloudNode: CloudNodeCard,
 });
 
-// Ustawia ręcznie pozycje węzłów w siatce (w realnym projekcie
-// można to policzyć automatycznie algorytmem "dagre", ale na start
-// jawne pozycje dają nam pełną kontrolę nad wyglądem)
 function buildFlowNodes(cloudNodes: CloudNode[]): Node[] {
   const positions: Record<string, { x: number; y: number }> = {
     "lb-1": { x: 350, y: 0 },
@@ -55,16 +51,41 @@ function buildFlowEdges(): Edge[] {
   }));
 }
 
-export function InfrastructureGraph() {
+interface InfrastructureGraphProps {
+  // Mapa nodeId -> procent postępu (0-100), przekazywana z terminala wdrożenia.
+  // Gdy węzeł ma wpis w tej mapie i progress < 100, pokazujemy go jako "provisioning".
+  deployProgress?: Record<string, number>;
+}
+
+export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraphProps) {
   const initialNodes = useMemo(() => buildFlowNodes(mockNodes), []);
   const initialEdges = useMemo(() => buildFlowEdges(), []);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   const [selectedNode, setSelectedNode] = useState<CloudNode | null>(null);
 
-  // Gdy użytkownik kliknie węzeł, pokazujemy panel szczegółów po prawej
+  // Za każdym razem, gdy deployProgress się zmienia, nakładamy status
+  // "provisioning" na węzły, które są w trakcie tworzenia
+  useEffect(() => {
+    setNodes((currentNodes) =>
+      currentNodes.map((n) => {
+        const progress = deployProgress[n.id];
+        const originalNode = mockNodes.find((m) => m.id === n.id);
+        if (!originalNode) return n;
+
+        const isProvisioning = progress !== undefined && progress < 100;
+        const updatedData: CloudNode = {
+          ...originalNode,
+          status: isProvisioning ? "provisioning" : originalNode.status,
+        };
+
+        return { ...n, data: updatedData };
+      })
+    );
+  }, [deployProgress, setNodes]);
+
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node.data as CloudNode);
   }, []);
@@ -87,9 +108,7 @@ export function InfrastructureGraph() {
           size={1}
           color="rgba(6,182,212,0.15)"
         />
-        <Controls
-          className="!bg-[#0A0A0C] !border !border-cyan-500/20 !rounded-lg [&>button]:!bg-[#0A0A0C] [&>button]:!border-cyan-500/10 [&>button]:!text-cyan-400"
-        />
+        <Controls className="!bg-[#0A0A0C] !border !border-cyan-500/20 !rounded-lg [&>button]:!bg-[#0A0A0C] [&>button]:!border-cyan-500/10 [&>button]:!text-cyan-400" />
         <MiniMap
           className="!bg-[#0A0A0C] !border !border-cyan-500/20 !rounded-lg"
           maskColor="rgba(10,10,12,0.8)"
@@ -97,11 +116,7 @@ export function InfrastructureGraph() {
         />
       </ReactFlow>
 
-      {/* Panel szczegółów wysuwany po kliknięciu węzła */}
-      <NodeDetailsPanel
-        node={selectedNode}
-        onClose={() => setSelectedNode(null)}
-      />
+      <NodeDetailsPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
     </div>
   );
 }
