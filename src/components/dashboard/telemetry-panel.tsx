@@ -6,8 +6,10 @@ import { useLiveMetrics } from "@/hooks/use-live-metrics";
 import { MetricsChart } from "./metrics-chart";
 import { CostChart } from "./cost-chart";
 import { AlertsFeed } from "./alerts-feed";
+import { useLanguage } from "@/context/language-context";
 
 export function TelemetryPanel() {
+  const { t } = useLanguage();
   const { history, alerts } = useLiveMetrics();
 
   const latestCost = history.length > 0 ? history[history.length - 1].cumulativeCost : 0;
@@ -17,10 +19,10 @@ export function TelemetryPanel() {
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 className="text-white font-semibold text-sm flex items-center gap-2">
           <Activity className="w-4 h-4 text-cyan-400" />
-          Telemetria na żywo
+          {t("telemetry.title")}
         </h2>
         <span className="text-xs text-white/40">
-          Koszt sesji:{" "}
+          {t("telemetry.sessionCost")}:{" "}
           <span className="text-cyan-400 font-medium">${latestCost.toFixed(4)}</span>
         </span>
       </div>
@@ -29,15 +31,15 @@ export function TelemetryPanel() {
         <TabsList className="bg-white/[0.03] border border-white/5">
           <TabsTrigger value="metrics" className="text-xs gap-1.5">
             <Activity className="w-3.5 h-3.5" />
-            CPU / RAM
+            {t("telemetry.tabMetrics")}
           </TabsTrigger>
           <TabsTrigger value="cost" className="text-xs gap-1.5">
             <DollarSign className="w-3.5 h-3.5" />
-            Koszty
+            {t("telemetry.tabCost")}
           </TabsTrigger>
           <TabsTrigger value="alerts" className="text-xs gap-1.5">
             <Bell className="w-3.5 h-3.5" />
-            Alerty
+            {t("telemetry.tabAlerts")}
             {alerts.length > 0 && (
               <span className="ml-1 bg-cyan-500/20 text-cyan-400 px-1.5 rounded-full text-[10px]">
                 {alerts.length}
@@ -49,7 +51,7 @@ export function TelemetryPanel() {
         <TabsContent value="metrics" className="mt-4">
           {history.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-white/30 text-sm">
-              Zbieranie pierwszych odczytów telemetrii...
+              {t("telemetry.gatheringMetrics")}
             </div>
           ) : (
             <MetricsChart data={history} />
@@ -59,7 +61,7 @@ export function TelemetryPanel() {
         <TabsContent value="cost" className="mt-4">
           {history.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-white/30 text-sm">
-              Zbieranie pierwszych odczytów kosztów...
+              {t("telemetry.gatheringCost")}
             </div>
           ) : (
             <CostChart data={history} />

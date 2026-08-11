@@ -6,6 +6,7 @@ import { Terminal, Rocket, CheckCircle2, X } from "lucide-react";
 import { DeployLogEntry, DeploymentPhase } from "@/types/deployment";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 const LEVEL_COLORS: Record<DeployLogEntry["level"], string> = {
   command: "text-cyan-300",
@@ -22,6 +23,7 @@ interface DeploymentTerminalProps {
 }
 
 export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) {
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [phase, setPhase] = useState<DeploymentPhase>("idle");
   const [logs, setLogs] = useState<DeployLogEntry[]>([]);
@@ -72,7 +74,7 @@ export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) 
         className="bg-cyan-600 hover:bg-cyan-500 text-white gap-2"
       >
         <Rocket className="w-4 h-4" />
-        {phase === "running" ? "Wdrażanie w toku..." : "Wdróż infrastrukturę"}
+        {phase === "running" ? t("deploy.inProgress") : t("deploy.button")}
       </Button>
 
       <AnimatePresence>
@@ -87,7 +89,7 @@ export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) 
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-cyan-400" />
                 <span className="text-xs font-medium text-white/80">
-                  terraform apply — omniscale-production
+                  {t("deploy.terminalTitle")}
                 </span>
                 {phase === "completed" && (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 ml-1" />
@@ -112,7 +114,7 @@ export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) 
                   ) : (
                     <>
                       <span className="text-white/20 mr-2">
-                        [{new Date(log.timestamp).toLocaleTimeString("pl-PL")}]
+                        [{new Date(log.timestamp).toLocaleTimeString(language === "pl" ? "pl-PL" : "en-US")}]
                       </span>
                       {log.message}
                     </>

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, AlertCircle, Info } from "lucide-react";
 import { AlertItem, AlertSeverity } from "@/types/telemetry";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 const SEVERITY_CONFIG: Record<AlertSeverity, { icon: React.ElementType; color: string }> = {
   critical: { icon: AlertCircle, color: "text-red-400" },
@@ -16,10 +17,12 @@ interface AlertsFeedProps {
 }
 
 export function AlertsFeed({ alerts }: AlertsFeedProps) {
+  const { t, language } = useLanguage();
+
   if (alerts.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-white/30 text-sm">
-        Brak alertów — system stabilny
+        {t("alerts.empty")}
       </div>
     );
   }
@@ -42,7 +45,7 @@ export function AlertsFeed({ alerts }: AlertsFeedProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-white/90 text-xs font-medium">{alert.nodeLabel}</span>
                   <span className="text-white/25 text-[10px]">
-                    {new Date(alert.timestamp).toLocaleTimeString("pl-PL")}
+                    {new Date(alert.timestamp).toLocaleTimeString(language === "pl" ? "pl-PL" : "en-US")}
                   </span>
                 </div>
                 <p className="text-white/50 text-xs mt-0.5 truncate">{alert.message}</p>

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Cpu, MemoryStick, DollarSign, Gauge } from "lucide-react";
 import { CloudNode } from "@/types/infrastructure";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/context/language-context";
 
 interface NodeDetailsPanelProps {
   node: CloudNode | null;
@@ -11,6 +12,8 @@ interface NodeDetailsPanelProps {
 }
 
 export function NodeDetailsPanel({ node, onClose }: NodeDetailsPanelProps) {
+  const { t } = useLanguage();
+
   return (
     <AnimatePresence>
       {node && (
@@ -52,23 +55,23 @@ export function NodeDetailsPanel({ node, onClose }: NodeDetailsPanelProps) {
           <div className="grid grid-cols-2 gap-3">
             <MetricTile
               icon={Cpu}
-              label="CPU"
+              label={t("node.cpu")}
               value={`${node.metrics.cpuUsage}%`}
             />
             <MetricTile
               icon={MemoryStick}
-              label="RAM"
+              label={t("node.ram")}
               value={`${node.metrics.memoryUsage}%`}
             />
             <MetricTile
               icon={DollarSign}
-              label="Koszt/h"
+              label={t("node.costPerHour")}
               value={`$${node.metrics.costPerHour.toFixed(3)}`}
             />
             {node.metrics.latencyMs !== undefined && (
               <MetricTile
                 icon={Gauge}
-                label="Latencja"
+                label={t("node.latency")}
                 value={`${node.metrics.latencyMs}ms`}
               />
             )}

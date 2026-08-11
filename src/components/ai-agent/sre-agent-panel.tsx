@@ -6,6 +6,7 @@ import { Bot, Sparkles, X, Loader2, AlertTriangle, AlertCircle, Info, TrendingDo
 import { SREAnalysisResult, InsightSeverity } from "@/types/ai-agent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 const SEVERITY_CONFIG: Record<InsightSeverity, { icon: React.ElementType; color: string; bg: string }> = {
   critical: { icon: AlertCircle, color: "text-red-400", bg: "bg-red-500/10 border-red-500/30" },
@@ -14,6 +15,7 @@ const SEVERITY_CONFIG: Record<InsightSeverity, { icon: React.ElementType; color:
 };
 
 export function SREAgentPanel() {
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SREAnalysisResult | null>(null);
@@ -26,13 +28,13 @@ export function SREAgentPanel() {
       const res = await fetch("/api/sre-agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ language }),
       });
-      if (!res.ok) throw new Error("Analiza nie powiodła się.");
+      if (!res.ok) throw new Error(t("agent.error"));
       const data: SREAnalysisResult = await res.json();
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nieznany błąd.");
+      setError(err instanceof Error ? err.message : t("agent.error"));
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +50,7 @@ export function SREAgentPanel() {
         className="fixed bottom-6 right-6 z-20 glass-panel glow-border rounded-full p-4 flex items-center gap-2"
       >
         <Bot className="w-5 h-5 text-cyan-400" />
-        <span className="text-sm font-medium text-white pr-1">AI SRE Agent</span>
+        <span className="text-sm font-medium text-white pr-1">{t("agent.title")}</span>
       </motion.button>
 
       <AnimatePresence>
@@ -77,8 +79,8 @@ export function SREAgentPanel() {
                     <Sparkles className="w-4 h-4 text-cyan-400" />
                   </div>
                   <div>
-                    <h2 className="text-white font-semibold text-sm">AI SRE Agent</h2>
-                    <p className="text-white/40 text-xs">Powered by Gemini</p>
+                    <h2 className="text-white font-semibold text-sm">{t("agent.title")}</h2>
+                    <p className="text-white/40 text-xs">{t("agent.poweredBy")}</p>
                   </div>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white">
@@ -90,12 +92,11 @@ export function SREAgentPanel() {
                 {!result && !isLoading && (
                   <div className="text-center py-10">
                     <p className="text-white/50 text-sm mb-4">
-                      Uruchom analizę AI, aby wykryć problemy w infrastrukturze i otrzymać
-                      rekomendacje optymalizacji kosztów.
+                      {t("agent.idlePrompt")}
                     </p>
                     <Button onClick={runAnalysis} className="bg-cyan-600 hover:bg-cyan-500 text-white">
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Uruchom analizę AI SRE
+                      {t("agent.runAnalysis")}
                     </Button>
                   </div>
                 )}
@@ -103,7 +104,7 @@ export function SREAgentPanel() {
                 {isLoading && (
                   <div className="flex flex-col items-center justify-center py-16 gap-3">
                     <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
-                    <p className="text-white/50 text-sm">Gemini analizuje infrastrukturę...</p>
+                    <p className="text-white/50 text-sm">{t("agent.analyzing")}</p>
                   </div>
                 )}
 
@@ -118,7 +119,7 @@ export function SREAgentPanel() {
                     <div className="glass-panel rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-white/50 text-xs uppercase tracking-wide">
-                          Ocena zdrowia systemu
+                          {t("agent.healthScore")}
                         </span>
                         <span className="text-2xl font-bold text-cyan-400">
                           {result.overallHealthScore}/100
@@ -146,7 +147,7 @@ export function SREAgentPanel() {
                                 {insight.estimatedMonthlySavings && insight.estimatedMonthlySavings > 0 && (
                                   <div className="flex items-center gap-1 mt-2 text-emerald-400 text-xs">
                                     <TrendingDown className="w-3 h-3" />
-                                    Potencjalna oszczędność: ${insight.estimatedMonthlySavings}/mies.
+                                    {t("agent.monthlySavings")}: ${insight.estimatedMonthlySavings}{t("agent.perMonth")}
                                   </div>
                                 )}
                               </div>
@@ -161,7 +162,7 @@ export function SREAgentPanel() {
                       variant="outline"
                       className="w-full border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/10"
                     >
-                      Uruchom analizę ponownie
+                      {t("agent.runAgain")}
                     </Button>
                   </div>
                 )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/context/language-context";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import ReactFlow, {
   Background,
@@ -58,6 +59,7 @@ interface InfrastructureGraphProps {
 }
 
 export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraphProps) {
+  const { t } = useLanguage();
   const initialNodes = useMemo(() => buildFlowNodes(mockNodes), []);
   const initialEdges = useMemo(() => buildFlowEdges(), []);
 
@@ -93,7 +95,7 @@ export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraph
   return (
     <div className="relative w-full h-[650px] glass-panel rounded-2xl overflow-hidden border border-cyan-500/10">
       <span className="absolute top-3 left-3 z-10 text-[10px] text-white/30 bg-[#0A0A0C]/60 px-2 py-1 rounded-md pointer-events-none">
-        Zoom: przyciski w lewym dolnym rogu lub gest uszczypnięcia
+        {t("graph.zoomHint")}
       </span>
       <ReactFlow
         nodes={nodes}
@@ -115,7 +117,10 @@ export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraph
           size={1}
           color="rgba(6,182,212,0.15)"
         />
-        <Controls className="!bg-[#0A0A0C] !border !border-cyan-500/20 !rounded-lg [&>button]:!bg-[#0A0A0C] [&>button]:!border-cyan-500/10 [&>button]:!text-cyan-400" />
+        <Controls
+          showInteractive={false}
+          className="!bg-[#12141A] !border !border-cyan-500/30 !rounded-xl !shadow-lg !shadow-black/50 [&>button]:!bg-[#12141A] [&>button]:!border-b [&>button]:!border-cyan-500/15 [&>button]:!text-cyan-300 [&>button]:!w-8 [&>button]:!h-8 [&>button:hover]:!bg-cyan-500/10 [&>button:hover]:!text-cyan-200 [&>button>svg]:!fill-current [&>button>svg]:!w-3.5 [&>button>svg]:!h-3.5"
+        />
         <MiniMap
           className="!bg-[#0A0A0C] !border !border-cyan-500/20 !rounded-lg"
           maskColor="rgba(10,10,12,0.8)"

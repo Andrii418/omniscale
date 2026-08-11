@@ -33,13 +33,18 @@ const RESPONSE_SCHEMA = {
 };
 
 // Buduje prompt na podstawie aktualnego stanu infrastruktury
-function buildPrompt(nodes: CloudNode[], userQuestion?: string): string {
+function buildPrompt(nodes: CloudNode[], language: "pl" | "en", userQuestion?: string): string {
   const infraSnapshot = nodes
     .map(
       (n) =>
         `- [${n.id}] ${n.label} (${n.type}, ${n.provider}/${n.region}): status=${n.status}, CPU=${n.metrics.cpuUsage}%, RAM=${n.metrics.memoryUsage}%, koszt=$${n.metrics.costPerHour}/h${n.metrics.latencyMs ? `, latencja=${n.metrics.latencyMs}ms` : ""}`
     )
     .join("\n");
+
+  const languageInstruction =
+    language === "pl"
+      ? "Odpowiadaj WYŁĄCZNIE po polsku."
+      : "Respond ONLY in English.";
 
   return `Jesteś doświadczonym Site Reliability Engineerem (SRE) analizującym żywą infrastrukturę chmurową.
 
@@ -50,21 +55,24 @@ ZADANIE:
 Przeanalizuj powyższe zasoby i zwróć zwięzłą analizę SRE: ogólną ocenę zdrowia systemu (0-100),
 oraz listę konkretnych spostrzeżeń (insights) — problemów wydajnościowych, ryzyk niezawodności
 i możliwości optymalizacji kosztów. Dla węzłów ze statusem "critical" lub "warning" ZAWSZE
-dodaj osobny insight z konkretną rekomendacją naprawy. Jeśli widzisz okazję do redukcji kosztów
-(np. nadmiarowe zasoby, niewykorzystany cache), oszacuj miesięczne oszczędności w USD.
+dodaj osobny insight z konkretną rekomendacją naprawy. Jeśli widzisz okazję do redukcji kosztów,
+oszacuj miesięczne oszczędności w USD.
+
+${languageInstruction}
 
 ${userQuestion ? `DODATKOWE PYTANIE UŻYTKOWNIKA: ${userQuestion}` : ""}
 
-Odpowiadaj po polsku, konkretnie i technicznie, jak inżynier do inżyniera.`;
+Odpowiadaj konkretnie i technicznie, jak inżynier do inżyniera.`;
 }
 
 export async function analyzeInfrastructure(
   nodes: CloudNode[],
+  language: "pl" | "en" = "en",
   userQuestion?: string
 ): Promise<SREAnalysisResult> {
   const response = await ai.models.generateContent({
     model: "gemini-flash-latest",
-    contents: buildPrompt(nodes, userQuestion),
+    contents: buildPrompt(nodes, language, userQuestion),
     config: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
