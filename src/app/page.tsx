@@ -4,9 +4,9 @@ import { useState, useCallback } from "react";
 import { InfrastructureGraph } from "@/components/topology/infrastructure-graph";
 import { SREAgentPanel } from "@/components/ai-agent/sre-agent-panel";
 import { DeploymentTerminal } from "@/components/dashboard/deployment-terminal";
+import { TelemetryPanel } from "@/components/dashboard/telemetry-panel";
 
 export default function Home() {
-  // Mapa nodeId -> procent postępu, aktualizowana na żywo przez terminal wdrożenia
   const [deployProgress, setDeployProgress] = useState<Record<string, number>>({});
 
   const handleNodeProgress = useCallback((nodeId: string, progress: number) => {
@@ -26,6 +26,7 @@ export default function Home() {
       </header>
 
       <InfrastructureGraph deployProgress={deployProgress} />
+      <TelemetryPanel />
       <SREAgentPanel />
     </main>
   );

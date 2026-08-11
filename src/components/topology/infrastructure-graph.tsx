@@ -92,6 +92,9 @@ export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraph
 
   return (
     <div className="relative w-full h-[650px] glass-panel rounded-2xl overflow-hidden border border-cyan-500/10">
+      <span className="absolute top-3 left-3 z-10 text-[10px] text-white/30 bg-[#0A0A0C]/60 px-2 py-1 rounded-md pointer-events-none">
+        Zoom: przyciski w lewym dolnym rogu lub gest uszczypnięcia
+      </span>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -101,6 +104,10 @@ export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraph
         nodeTypes={nodeTypes}
         fitView
         proOptions={{ hideAttribution: true }}
+        zoomOnScroll={false}
+        panOnScroll={false}
+        preventScrolling={false}
+        zoomOnPinch={true}
       >
         <Background
           variant={BackgroundVariant.Dots}
