@@ -12,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -42,48 +43,54 @@ export function CommandPalette() {
 
   return (
     <CommandDialog open={isOpen} onOpenChange={setOpen}>
-      <CommandInput placeholder={t("cmd.placeholder")} />
-      <CommandList>
-        <CommandEmpty>{t("cmd.empty")}</CommandEmpty>
+      {/* Command to korzeń biblioteki cmdk - dostarcza store ze stanem
+          wyszukiwania/nawigacji, z którego korzystają CommandInput, CommandList itd.
+          W tej wersji shadcn (Base UI) CommandDialog go NIE dostarcza automatycznie,
+          więc musimy go dodać ręcznie tutaj. */}
+      <Command>
+        <CommandInput placeholder={t("cmd.placeholder")} />
+        <CommandList>
+          <CommandEmpty>{t("cmd.empty")}</CommandEmpty>
 
-        <CommandGroup heading={t("cmd.groupActions")}>
-          <CommandItem onSelect={() => runAction("deploy")}>
-            <Rocket className="w-4 h-4 text-cyan-400 mr-2" />
-            {t("cmd.deploy")}
-          </CommandItem>
-          <CommandItem onSelect={() => runAction("runAnalysis")}>
-            <Sparkles className="w-4 h-4 text-cyan-400 mr-2" />
-            {t("cmd.runAnalysis")}
-          </CommandItem>
-          <CommandItem onSelect={() => runAction("openAgent")}>
-            <Bot className="w-4 h-4 text-cyan-400 mr-2" />
-            {t("cmd.openAgent")}
-          </CommandItem>
-          <CommandItem onSelect={() => runAction("toggleLanguage")}>
-            <Languages className="w-4 h-4 text-cyan-400 mr-2" />
-            {t("cmd.toggleLanguage")}
-          </CommandItem>
-        </CommandGroup>
+          <CommandGroup heading={t("cmd.groupActions")}>
+            <CommandItem onSelect={() => runAction("deploy")}>
+              <Rocket className="w-4 h-4 text-cyan-400 mr-2" />
+              {t("cmd.deploy")}
+            </CommandItem>
+            <CommandItem onSelect={() => runAction("runAnalysis")}>
+              <Sparkles className="w-4 h-4 text-cyan-400 mr-2" />
+              {t("cmd.runAnalysis")}
+            </CommandItem>
+            <CommandItem onSelect={() => runAction("openAgent")}>
+              <Bot className="w-4 h-4 text-cyan-400 mr-2" />
+              {t("cmd.openAgent")}
+            </CommandItem>
+            <CommandItem onSelect={() => runAction("toggleLanguage")}>
+              <Languages className="w-4 h-4 text-cyan-400 mr-2" />
+              {t("cmd.toggleLanguage")}
+            </CommandItem>
+          </CommandGroup>
 
-        <CommandGroup heading={t("cmd.groupNodes")}>
-          {mockNodes.map((node) => {
-            const Icon = NODE_ICONS[node.type];
-            return (
-              <CommandItem
-                key={node.id}
-                value={`${node.label} ${node.type} ${node.id}`}
-                onSelect={() => runAction("focusNode", node.id)}
-              >
-                <Icon className="w-4 h-4 text-white/50 mr-2" />
-                <span>{node.label}</span>
-                <span className="ml-auto text-[10px] text-white/30 uppercase">
-                  {node.status}
-                </span>
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
-      </CommandList>
+          <CommandGroup heading={t("cmd.groupNodes")}>
+            {mockNodes.map((node) => {
+              const Icon = NODE_ICONS[node.type];
+              return (
+                <CommandItem
+                  key={node.id}
+                  value={`${node.label} ${node.type} ${node.id}`}
+                  onSelect={() => runAction("focusNode", node.id)}
+                >
+                  <Icon className="w-4 h-4 text-white/50 mr-2" />
+                  <span>{node.label}</span>
+                  <span className="ml-auto text-[10px] text-white/30 uppercase">
+                    {node.status}
+                  </span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        </CommandList>
+      </Command>
     </CommandDialog>
   );
 }
