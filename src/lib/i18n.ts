@@ -42,6 +42,10 @@ export const translations = {
     "cmd.openAgent": "Otwórz AI SRE Agent",
     "cmd.empty": "Brak wyników.",
     "cmd.hint": "Otwórz paletę poleceń",
+    "agent.chatTitle": "Zapytaj o infrastrukturę",
+    "agent.chatPlaceholder": "Zapytaj o konkretny problem lub rekomendację...",
+    "agent.chatSend": "Wyślij",
+    "agent.chatThinking": "Agent pisze...",
   },
   en: {
     "app.subtitle": "Cloud infrastructure map — environment: production",
@@ -81,6 +85,10 @@ export const translations = {
     "cmd.openAgent": "Open AI SRE Agent",
     "cmd.empty": "No results found.",
     "cmd.hint": "Open command palette",
+    "agent.chatTitle": "Ask about your infrastructure",
+    "agent.chatPlaceholder": "Ask about a specific issue or recommendation...",
+    "agent.chatSend": "Send",
+    "agent.chatThinking": "Agent is typing...",
   },
 } as const;
 

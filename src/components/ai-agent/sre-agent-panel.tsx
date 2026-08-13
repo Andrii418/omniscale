@@ -1,9 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Sparkles, X, Loader2, AlertTriangle, AlertCircle, Info, TrendingDown } from "lucide-react";
-import { SREAnalysisResult, InsightSeverity } from "@/types/ai-agent";
+import {
+  Bot,
+  Sparkles,
+  X,
+  Loader2,
+  AlertTriangle,
+  AlertCircle,
+  Info,
+  TrendingDown,
+  Send,
+  User,
+} from "lucide-react";
+import { SREAnalysisResult, InsightSeverity, ChatMessage } from "@/types/ai-agent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
@@ -23,9 +34,20 @@ export function SREAgentPanel() {
   const [result, setResult] = useState<SREAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Stan czatu - osobny od stanu analizy
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, isChatLoading]);
+
   async function runAnalysis() {
     setIsLoading(true);
     setError(null);
+    setChatMessages([]); // nowa analiza = nowa rozmowa
     try {
       const res = await fetch("/api/sre-agent", {
         method: "POST",
@@ -42,6 +64,57 @@ export function SREAgentPanel() {
     }
   }
 
+  async function sendChatMessage() {
+    const question = chatInput.trim();
+    if (!question || isChatLoading) return;
+
+    const userMessage: ChatMessage = {
+      id: `u-${Date.now()}`,
+      role: "user",
+      content: question,
+      timestamp: Date.now(),
+    };
+    const updatedMessages = [...chatMessages, userMessage];
+    setChatMessages(updatedMessages);
+    setChatInput("");
+    setIsChatLoading(true);
+
+    try {
+      // Mapujemy naszą lokalną historię czatu na format oczekiwany przez Gemini
+      // ("assistant" -> "model") i wysyłamy CAŁĄ dotychczasową rozmowę
+      const history = updatedMessages.map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        text: m.content,
+      }));
+
+      const res = await fetch("/api/sre-agent/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history, language }),
+      });
+      if (!res.ok) throw new Error(t("agent.error"));
+      const data: { reply: string } = await res.json();
+
+      const assistantMessage: ChatMessage = {
+        id: `a-${Date.now()}`,
+        role: "assistant",
+        content: data.reply,
+        timestamp: Date.now(),
+      };
+      setChatMessages((prev) => [...prev, assistantMessage]);
+    } catch {
+      const errorMessage: ChatMessage = {
+        id: `err-${Date.now()}`,
+        role: "assistant",
+        content: t("agent.error"),
+        timestamp: Date.now(),
+      };
+      setChatMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  }
+
   useEffect(() => {
     registerAction("openAgent", () => setIsOpen(true));
     registerAction("runAnalysis", () => {
@@ -53,7 +126,6 @@ export function SREAgentPanel() {
 
   return (
     <>
-      {/* Przycisk otwierający panel - dolny prawy róg ekranu */}
       <motion.button
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.05 }}
@@ -67,7 +139,6 @@ export function SREAgentPanel() {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Tło przyciemniające resztę ekranu */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -76,15 +147,14 @@ export function SREAgentPanel() {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
             />
 
-            {/* Panel boczny */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 260 }}
-              className="fixed top-0 right-0 h-full w-full sm:w-[440px] bg-[#0A0A0C] border-l border-cyan-500/20 z-40 overflow-y-auto"
+              className="fixed top-0 right-0 h-full w-full sm:w-[440px] bg-[#0A0A0C] border-l border-cyan-500/20 z-40 flex flex-col"
             >
-              <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0A0A0C] z-10">
+              <div className="p-5 border-b border-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
                     <Sparkles className="w-4 h-4 text-cyan-400" />
@@ -99,12 +169,11 @@ export function SREAgentPanel() {
                 </button>
               </div>
 
-              <div className="p-5">
+              {/* Sekcja przewijana: analiza + czat */}
+              <div className="flex-1 overflow-y-auto p-5">
                 {!result && !isLoading && (
                   <div className="text-center py-10">
-                    <p className="text-white/50 text-sm mb-4">
-                      {t("agent.idlePrompt")}
-                    </p>
+                    <p className="text-white/50 text-sm mb-4">{t("agent.idlePrompt")}</p>
                     <Button onClick={runAnalysis} className="bg-cyan-600 hover:bg-cyan-500 text-white">
                       <Sparkles className="w-4 h-4 mr-2" />
                       {t("agent.runAnalysis")}
@@ -151,14 +220,13 @@ export function SREAgentPanel() {
                                 <h4 className="text-white text-sm font-medium">{insight.title}</h4>
                                 <p className="text-white/60 text-xs mt-1">{insight.description}</p>
                                 <div className="mt-2 bg-white/5 rounded-md p-2">
-                                  <p className="text-cyan-300 text-xs">
-                                    💡 {insight.recommendation}
-                                  </p>
+                                  <p className="text-cyan-300 text-xs">💡 {insight.recommendation}</p>
                                 </div>
                                 {insight.estimatedMonthlySavings && insight.estimatedMonthlySavings > 0 && (
                                   <div className="flex items-center gap-1 mt-2 text-emerald-400 text-xs">
                                     <TrendingDown className="w-3 h-3" />
-                                    {t("agent.monthlySavings")}: ${insight.estimatedMonthlySavings}{t("agent.perMonth")}
+                                    {t("agent.monthlySavings")}: ${insight.estimatedMonthlySavings}
+                                    {t("agent.perMonth")}
                                   </div>
                                 )}
                               </div>
@@ -175,9 +243,88 @@ export function SREAgentPanel() {
                     >
                       {t("agent.runAgain")}
                     </Button>
+
+                    {/* Sekcja czatu - widoczna dopiero po pierwszej analizie */}
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-white/50 text-xs uppercase tracking-wide mb-3 mt-3">
+                        {t("agent.chatTitle")}
+                      </p>
+
+                      <div className="space-y-3">
+                        {chatMessages.map((msg) => (
+                          <motion.div
+                            key={msg.id}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={cn(
+                              "flex gap-2 items-start",
+                              msg.role === "user" && "flex-row-reverse"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                                msg.role === "user"
+                                  ? "bg-white/10"
+                                  : "bg-cyan-500/15 border border-cyan-500/20"
+                              )}
+                            >
+                              {msg.role === "user" ? (
+                                <User className="w-3 h-3 text-white/60" />
+                              ) : (
+                                <Bot className="w-3 h-3 text-cyan-400" />
+                              )}
+                            </div>
+                            <div
+                              className={cn(
+                                "rounded-lg px-3 py-2 text-xs leading-relaxed max-w-[80%]",
+                                msg.role === "user"
+                                  ? "bg-white/[0.06] text-white/90"
+                                  : "bg-cyan-500/[0.06] border border-cyan-500/10 text-white/80"
+                              )}
+                            >
+                              {msg.content}
+                            </div>
+                          </motion.div>
+                        ))}
+
+                        {isChatLoading && (
+                          <div className="flex items-center gap-2 text-white/40 text-xs pl-8">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            {t("agent.chatThinking")}
+                          </div>
+                        )}
+                        <div ref={chatEndRef} />
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
+
+              {/* Pole wpisywania czatu - przyklejone na dole, tylko gdy jest już analiza */}
+              {result && (
+                <div className="p-3 border-t border-white/5 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") sendChatMessage();
+                      }}
+                      placeholder={t("agent.chatPlaceholder")}
+                      className="flex-1 bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/30 outline-none focus:border-cyan-500/40"
+                    />
+                    <Button
+                      onClick={sendChatMessage}
+                      disabled={!chatInput.trim() || isChatLoading}
+                      size="icon"
+                      className="bg-cyan-600 hover:bg-cyan-500 text-white shrink-0"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </>
         )}
