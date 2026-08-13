@@ -1,6 +1,5 @@
 "use client";
 
-import { useLanguage } from "@/context/language-context";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import ReactFlow, {
   Background,
@@ -19,6 +18,8 @@ import { CloudNodeCard } from "./cloud-node";
 import { mockNodes, mockEdges } from "@/data/mock-infrastructure";
 import { CloudNode } from "@/types/infrastructure";
 import { NodeDetailsPanel } from "./node-details-panel";
+import { useLanguage } from "@/context/language-context";
+import { useCommandBus } from "@/context/command-context";
 
 const nodeTypes: NodeTypes = Object.freeze({
   cloudNode: CloudNodeCard,
@@ -60,6 +61,7 @@ interface InfrastructureGraphProps {
 
 export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraphProps) {
   const { t } = useLanguage();
+  const { registerAction } = useCommandBus();
   const initialNodes = useMemo(() => buildFlowNodes(mockNodes), []);
   const initialEdges = useMemo(() => buildFlowEdges(), []);
 
@@ -67,6 +69,13 @@ export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraph
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   const [selectedNode, setSelectedNode] = useState<CloudNode | null>(null);
+
+  useEffect(() => {
+    registerAction("focusNode", (nodeId) => {
+      const node = mockNodes.find((n) => n.id === nodeId);
+      if (node) setSelectedNode(node);
+    });
+  }, [registerAction]);
 
   // Za każdym razem, gdy deployProgress się zmienia, nakładamy status
   // "provisioning" na węzły, które są w trakcie tworzenia
@@ -97,6 +106,7 @@ export function InfrastructureGraph({ deployProgress = {} }: InfrastructureGraph
       <span className="absolute top-3 left-3 z-10 text-[10px] text-white/30 bg-[#0A0A0C]/60 px-2 py-1 rounded-md pointer-events-none">
         {t("graph.zoomHint")}
       </span>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}

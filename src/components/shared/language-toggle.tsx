@@ -1,11 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/language-context";
+import { useCommandBus } from "@/context/command-context";
 
 export function LanguageToggle() {
   const { language, toggleLanguage } = useLanguage();
+  const { registerAction } = useCommandBus();
   const isPolish = language === "pl";
+
+  useEffect(() => {
+    registerAction("toggleLanguage", () => toggleLanguage());
+  }, [registerAction, toggleLanguage]);
 
   return (
     <button

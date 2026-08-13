@@ -7,6 +7,7 @@ import { DeployLogEntry, DeploymentPhase } from "@/types/deployment";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
+import { useCommandBus } from "@/context/command-context";
 
 const LEVEL_COLORS: Record<DeployLogEntry["level"], string> = {
   command: "text-cyan-300",
@@ -24,6 +25,7 @@ interface DeploymentTerminalProps {
 
 export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) {
   const { t, language } = useLanguage();
+  const { registerAction } = useCommandBus();
   const [isOpen, setIsOpen] = useState(false);
   const [phase, setPhase] = useState<DeploymentPhase>("idle");
   const [logs, setLogs] = useState<DeployLogEntry[]>([]);
@@ -65,6 +67,10 @@ export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) 
       eventSource.close();
     };
   }, [onNodeProgress]);
+
+  useEffect(() => {
+    registerAction("deploy", () => startDeployment());
+  }, [registerAction, startDeployment]);
 
   return (
     <>

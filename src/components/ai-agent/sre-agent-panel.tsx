@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Sparkles, X, Loader2, AlertTriangle, AlertCircle, Info, TrendingDown } from "lucide-react";
 import { SREAnalysisResult, InsightSeverity } from "@/types/ai-agent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
+import { useCommandBus } from "@/context/command-context";
 
 const SEVERITY_CONFIG: Record<InsightSeverity, { icon: React.ElementType; color: string; bg: string }> = {
   critical: { icon: AlertCircle, color: "text-red-400", bg: "bg-red-500/10 border-red-500/30" },
@@ -16,6 +17,7 @@ const SEVERITY_CONFIG: Record<InsightSeverity, { icon: React.ElementType; color:
 
 export function SREAgentPanel() {
   const { t, language } = useLanguage();
+  const { registerAction } = useCommandBus();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SREAnalysisResult | null>(null);
@@ -39,6 +41,15 @@ export function SREAgentPanel() {
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    registerAction("openAgent", () => setIsOpen(true));
+    registerAction("runAnalysis", () => {
+      setIsOpen(true);
+      runAnalysis();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registerAction]);
 
   return (
     <>
