@@ -58,6 +58,8 @@ export const translations = {
     "whatif.difference": "Różnica",
     "whatif.breakdown": "Podział kosztów",
     "cmd.openWhatIf": "Otwórz symulator kosztów",
+    "telemetry.tabBreakdown": "Podział kosztów",
+    "breakdown.shareOfTotal": "udziału w koszcie",
   },
   en: {
     "app.subtitle": "Cloud infrastructure map — environment: production",
@@ -113,6 +115,8 @@ export const translations = {
     "whatif.difference": "Difference",
     "whatif.breakdown": "Cost breakdown",
     "cmd.openWhatIf": "Open cost simulator",
+    "telemetry.tabBreakdown": "Cost breakdown",
+    "breakdown.shareOfTotal": "of total cost",
   },
 } as const;
 

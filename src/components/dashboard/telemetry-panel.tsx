@@ -1,10 +1,11 @@
 "use client";
 
-import { Activity, DollarSign, Bell } from "lucide-react";
+import { Activity, DollarSign, Bell, Boxes } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLiveMetrics } from "@/hooks/use-live-metrics";
 import { MetricsChart } from "./metrics-chart";
 import { CostChart } from "./cost-chart";
+import { CostTreemap } from "./cost-treemap";
 import { AlertsFeed } from "./alerts-feed";
 import { useLanguage } from "@/context/language-context";
 
@@ -37,6 +38,10 @@ export function TelemetryPanel() {
             <DollarSign className="w-3.5 h-3.5" />
             {t("telemetry.tabCost")}
           </TabsTrigger>
+          <TabsTrigger value="breakdown" className="text-xs gap-1.5">
+            <Boxes className="w-3.5 h-3.5" />
+            {t("telemetry.tabBreakdown")}
+          </TabsTrigger>
           <TabsTrigger value="alerts" className="text-xs gap-1.5">
             <Bell className="w-3.5 h-3.5" />
             {t("telemetry.tabAlerts")}
@@ -66,6 +71,10 @@ export function TelemetryPanel() {
           ) : (
             <CostChart data={history} />
           )}
+        </TabsContent>
+
+        <TabsContent value="breakdown" className="mt-4">
+          <CostTreemap />
         </TabsContent>
 
         <TabsContent value="alerts" className="mt-4">
