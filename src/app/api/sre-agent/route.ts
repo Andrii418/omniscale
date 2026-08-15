@@ -5,10 +5,9 @@ import { mockNodes } from "@/data/mock-infrastructure";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const userQuestion: string | undefined = body?.question;
     const language: "pl" | "en" = body?.language === "pl" ? "pl" : "en";
 
-    const result = await analyzeInfrastructure(mockNodes, language, userQuestion);
+    const result = await analyzeInfrastructure(mockNodes, language);
 
     return NextResponse.json(result);
   } catch (error) {
