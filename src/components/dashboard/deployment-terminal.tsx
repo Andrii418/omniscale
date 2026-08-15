@@ -89,7 +89,7 @@ export function DeploymentTerminal({ onNodeProgress }: DeploymentTerminalProps) 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-6 right-6 md:right-auto md:w-[640px] z-30 glass-panel glow-border rounded-xl overflow-hidden"
+            className="fixed bottom-6 left-6 right-6 md:right-auto md:w-[640px] z-40 bg-[#0A0A0C] border border-cyan-500/25 shadow-2xl shadow-black/80 rounded-xl overflow-hidden"
           >
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.02]">
               <div className="flex items-center gap-2">
