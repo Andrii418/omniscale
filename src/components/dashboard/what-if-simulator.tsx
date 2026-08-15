@@ -166,9 +166,13 @@ export function WhatIfSimulator() {
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-[#12141A] border border-cyan-500/20 shadow-xl shadow-black/60 z-50">
                         {SIZE_OPTIONS.map((size) => (
-                          <SelectItem key={size} value={size}>
+                          <SelectItem
+                            key={size}
+                            value={size}
+                            className="text-white/80 focus:bg-cyan-500/10 focus:text-cyan-300"
+                          >
                             {SIZE_LABELS[size]}
                           </SelectItem>
                         ))}
@@ -187,9 +191,13 @@ export function WhatIfSimulator() {
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-[#12141A] border border-cyan-500/20 shadow-xl shadow-black/60 z-50">
                         {SIZE_OPTIONS.map((size) => (
-                          <SelectItem key={size} value={size}>
+                          <SelectItem
+                            key={size}
+                            value={size}
+                            className="text-white/80 focus:bg-cyan-500/10 focus:text-cyan-300"
+                          >
                             {SIZE_LABELS[size]}
                           </SelectItem>
                         ))}
