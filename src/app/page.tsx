@@ -1,5 +1,6 @@
 "use client";
 
+import { WhatIfSimulator } from "@/components/dashboard/what-if-simulator";
 import { useState, useCallback } from "react";
 import { Search } from "lucide-react";
 import { LanguageToggle } from "@/components/shared/language-toggle";
@@ -49,6 +50,7 @@ export default function Home() {
       <InfrastructureGraph deployProgress={deployProgress} />
       <TelemetryPanel />
       <SREAgentPanel />
+      <WhatIfSimulator />
       <CommandPalette />
     </main>
   );

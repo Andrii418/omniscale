@@ -5,6 +5,7 @@ import {
   Sparkles,
   Languages,
   Bot,
+  Calculator,
   Server,
   Database,
   Network,
@@ -65,6 +66,10 @@ export function CommandPalette() {
               <Bot className="w-4 h-4 text-cyan-400 mr-2" />
               {t("cmd.openAgent")}
             </CommandItem>
+            <CommandItem onSelect={() => runAction("openWhatIf")}>
+            <Calculator className="w-4 h-4 text-cyan-400 mr-2" />
+            {t("cmd.openWhatIf")}
+          </CommandItem>
             <CommandItem onSelect={() => runAction("toggleLanguage")}>
               <Languages className="w-4 h-4 text-cyan-400 mr-2" />
               {t("cmd.toggleLanguage")}
